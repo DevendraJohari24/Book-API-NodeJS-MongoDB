@@ -7,6 +7,9 @@ const Database = require("./database");
 // initialization
 const BookApp = express();
 
+// Specify which kind of data u want to send
+BookApp.use(express.json());
+
 BookApp.get("/",(request, response)=>{
     response.json({
         message: "Server is working!!!",
@@ -14,6 +17,8 @@ BookApp.get("/",(request, response)=>{
 });
 
 //-------------------------------------------------BOOK------------------------------------------------------------//
+
+        //----------------------------------------GET-----------------------------------------//
 
 // Route  - /book
 // Des    - To get all the books
@@ -81,6 +86,108 @@ BookApp.get("/book/a/:author",(req,res)=>{
     });
 });
 
+            // ------------------------------------------ POST REQUESTS -----------------------------------//
+
+// Route  - /book/new
+// Des    - To add a new book
+// Access - Public
+// Method - POST
+// Params - none
+// Body   - {request}
+ 
+BookApp.post("/book/new",(req,res)=>{
+    const { newBook } = req.body;
+    Database.Book.push(newBook);
+
+    return res.json( Database.Book)
+});
+
+
+
+        //----------------------------------------------PUT---------------------------------------------//
+
+// Route  - /book/update/:isbn
+// Des    - To update book details
+// Access - Public
+// Method - PUT
+// Params - isbn
+// Body   - {request}
+
+BookApp.put("/book/update/:isbn",(req, res)=>{
+    const {updateBook} = req.body;
+    const { isbn } = req.params;
+
+    const getBook = Database.Book.map((book) => {
+        if(book.ISBN === isbn){
+            return {...book, ...updateBook};
+        }
+        return book;
+    });
+    return res.json(getBook);
+})
+
+// Route  - /bookAuthor/update/:isbn
+// Des    - To update book author and add it into author database
+// Access - Public
+// Method - PUT
+// Params - isbn
+// Body   - none
+
+
+BookApp.put("/bookAuthor/update/:isbn",(req, res)=>{
+    const {newAuthor} = req.body;
+    const {isbn} = req.params;
+
+    // Update Book Details
+    const getBook = Database.Book.map((book)=>{
+        if(book.ISBN === isbn){
+            if(!book.authors.includes(newAuthor)){
+                return book.authors.push(newAuthor);
+            }
+            return book;
+        }
+        return book;
+    });
+
+    // Update Author Database
+    const getAuthor = Database.Author.map((author) => {
+        if(author.id === newAuthor){
+            if(!author.books.includes(isbn)){
+                return author.books.push(isbn);
+            }
+            return author;
+        }
+        return author;
+    });
+    return res.json({book: getBook, author: getAuthor});
+});
+
+
+
+// Route  - /bookAuthor/update/:isbn
+// Des    - To update title of the selected book
+// Access - Public
+// Method - PUT
+// Params - isbn
+// Body   - none
+
+BookApp.put("/bookAuthor/update/:isbn",(req, res)=>{
+    const {updatedBook} = req.body;
+    const {isbn} = req.params;
+
+    // Update Book Details
+    const getBook = Database.Book.map((book)=>{
+        if(book.ISBN === isbn){
+            book.title = updatedBook.title;
+            return book;
+        }
+        return book;
+    });
+
+    return res.json({book: getBook});
+});
+
+
 
 
 // ------------------------------------------------------ AUTHOR -----------------------------------------------------------------//
@@ -133,6 +240,50 @@ BookApp.get("/author/b/:book",(req, res)=>{
         author: getAuthor,
     });
 });
+
+        //--------------------------------POST---------------------------------//
+
+// Route  - /author/new
+// Des    - To add new author
+// Access - Public
+// Method - POST
+// Params - none
+// Body   - none
+
+BookApp.post("/author/new",(req, res)=>{
+    const { newAuthor } = req.body;  // Curly braces tells from this request of body object i want to destructure it and from inside it i want to take the constant newAuthor and i want to save it in it.
+                        // It is object inside object
+    Database.Author.push(newAuthor);
+
+    return res.json({
+        message: "Author was added",
+    })
+});
+
+        //--------------------------------------------PUT-------------------------------------------//
+
+
+// TODO : STUDENT TASK
+// Route  - /author/update/:id
+// Des    - To update details of any author  
+// Access - Public
+// Method - PUT
+// Params - id
+// Body   - none
+
+BookApp.put("/author/update/:id",(req, res)=>{
+    const {updateAuthor} = req.body;
+    const { id } = parseInt(req.params);
+
+    const getAuthor = Database.Author.map((author) => {
+        if(author.id === id){
+            return {...author, ...updateAuthor};
+        }
+        return author;
+    });
+    return res.json(getAuthor);
+})
+
 
 
 //------------------------------------------------PUBLICATIONS---------------------------------------------------------//
@@ -190,6 +341,54 @@ BookApp.get("/publication/p/:book",(req, res)=>{
 });
 
 
+        //-------------------------- POST----------------------------------------//
+
+
+// Route  - /publication/new
+// Des    - To add new Publication
+// Access - Public
+// Method - POST
+// Params - none
+// Body   - none
+
+BookApp.post("/publication/new",(req, res)=>{
+    const { newPublication } = req.body;  // Curly braces tells from this request of body object i want to destructure it and from inside it i want to take the constant newAuthor and i want to save it in it.
+                        // It is object inside object
+    Database.Publication.push(newPublication);
+
+    return res.json({
+        message: "Publication was added",
+    })
+});
+
+        //------------------------------------------PUT-----------------------------------//
+
+// TODO : STUDENT TASK
+// Route  - /publication/update/:id
+// Des    - To update details of any publication  
+// Access - Public
+// Method - PUT
+// Params - id
+// Body   - none
+
+BookApp.put("/publication/update/:id",(req, res)=>{
+    const {updatePublication} = req.body;
+    const { id } = parseInt(req.params);
+
+    const getPublication = Database.Author.map((publication) => {
+        if(publication.id === id){
+            return {...publication, ...updatePublication};
+        }
+        return publication;
+    });
+    return res.json(getPublication);
+})
+
+
+    
+
+
+// Start the server with port 4000
 BookApp.listen(4000,()=>{
     console.log("Server is running!!");
 });
