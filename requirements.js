@@ -27,10 +27,9 @@ Publications
 
 Book 
  - GET
-
-    - To get all the books
-    - To get specific books
-    - To get a list of books based on catagory
+    - To get all the books    👌
+    - To get specific books   👌
+    - To get a list of books based on catagory 👌
     - To get a list of books based on author
 
  - POST
